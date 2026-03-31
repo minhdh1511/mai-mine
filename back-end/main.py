@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
@@ -19,6 +20,15 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 app = FastAPI(lifespan=lifespan)
+
+# Allow your Angular frontend to talk to this backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"], # Replace with your Angular port if different
+    allow_credentials=True,
+    allow_methods=["*"], # Allows GET, POST, PUT, DELETE
+    allow_headers=["*"],
+)
 
 app.include_router(scores_router)
 
