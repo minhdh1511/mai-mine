@@ -9,17 +9,16 @@ from core.database import engine, Base, get_async_session
 
 from features.scores.router import router as scores_router
 
-# Lifespan event to create tables on startup
+# Lifespan event to manage resources on startup/shutdown
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        # This creates the tables based on your models
-        await conn.run_sync(Base.metadata.create_all)
+    # We rely on Alembic to create tables now, so we just yield to let the app run!
     yield
-    # Clean up the engine when the app shuts down
+    # Clean up the database engine when the app shuts down
     await engine.dispose()
 
-app = FastAPI(lifespan=lifespan)
+# Create the FastAPI app
+app = FastAPI(lifespan=lifespan, title="Maimai B50 API")
 
 # Allow your Angular frontend to talk to this backend
 app.add_middleware(
